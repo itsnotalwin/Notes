@@ -59,13 +59,16 @@ body{
   justify-content:space-between;
   align-items:center;
   margin-bottom:14px;
+  padding-bottom:8px;
+  border-bottom:0.5px solid rgba(255,255,255,0.06);
 }
 
 .title{
-  font-size:12px;
+  font-size:13px;
   letter-spacing:0.12em;
-  color:rgba(255,255,255,0.45);
+  color:rgba(255,255,255,0.5);
   text-transform:uppercase;
+  font-weight:450;
 }
 
 .add{
@@ -73,8 +76,11 @@ body{
   border:1px solid rgba(255,255,255,0.06);
   color:#fff;
   border-radius:12px;
-  padding:8px 14px;
-  font-size:12px;
+  padding:8px 16px;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  transition:transform 0.08s ease, background 0.08s ease;
 }
 
 .add:active{
@@ -83,13 +89,13 @@ body{
 }
 
 /* =========================
-   GRID (tighter + more iOS density)
+   GRID (3 columns, dense)
 ========================= */
 
 .grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:8px;
+  gap:9px;
   flex:1;
   overflow-y:auto;
   padding-bottom:10px;
@@ -98,27 +104,25 @@ body{
 .grid::-webkit-scrollbar{ display:none; }
 
 /* =========================
-   NOTE (key aesthetic fix)
+   NOTE CARD
 ========================= */
 
 .note{
   aspect-ratio:1;
   background:#121214;
   border:1px solid rgba(255,255,255,0.04);
-  border-radius:14px;
-  padding:10px;
+  border-radius:16px;
+  padding:12px 8px;
   font-size:11px;
   line-height:1.35;
   color:rgba(255,255,255,0.88);
-
   overflow:hidden;
   white-space:pre-wrap;
   word-break:break-word;
-
   display:flex;
   align-items:flex-start;
-
-  transition:transform 0.12s ease, background 0.12s ease;
+  cursor:pointer;
+  transition:transform 0.08s ease, background 0.08s ease;
 }
 
 .note:active{
@@ -126,13 +130,12 @@ body{
   background:#1a1a1c;
 }
 
-/* subtle fade instead of harsh empty look */
 .note.empty{
   color:rgba(255,255,255,0.35);
 }
 
 /* =========================
-   EDITOR (softer transition feel)
+   FULLSCREEN EDITOR (optimized for iPhone)
 ========================= */
 
 .editor{
@@ -140,72 +143,107 @@ body{
   position:fixed;
   inset:0;
   background:#000;
-  padding:14px;
+  z-index:200;
+  flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 12px) 16px;
 }
 
-textarea{
+.editor.active{
+  display:flex;
+}
+
+/* textarea takes remaining space */
+.editor textarea{
+  flex:1;
   width:100%;
-  height:85vh;
   background:#0c0c0e;
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:16px;
-  padding:14px;
+  border:0.5px solid rgba(255,255,255,0.08);
+  border-radius:20px;
+  padding:18px;
   color:#fff;
-  font-size:14px;
-  line-height:1.45;
+  font-size:16px;
+  line-height:1.5;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
   outline:none;
   resize:none;
+  -webkit-appearance:none;
 }
 
-/* focus is subtle, not bright */
-textarea:focus{
-  border-color:rgba(255,255,255,0.14);
+.editor textarea:focus{
+  border-color:rgba(255,255,255,0.2);
 }
 
 /* =========================
-   BUTTON BAR (quieter)
+   BUTTON BAR (sticky at bottom)
 ========================= */
 
-.bar{
+.button-bar{
   display:flex;
-  gap:8px;
-  margin-top:10px;
+  gap:10px;
+  margin-top:14px;
+  padding-bottom:4px;
 }
 
-.bar button{
+.button-bar button{
   flex:1;
   background:#121214;
   border:1px solid rgba(255,255,255,0.06);
   color:#fff;
-  border-radius:12px;
-  padding:10px;
-  font-size:12px;
+  border-radius:14px;
+  padding:14px 0;
+  font-size:15px;
+  font-weight:500;
+  cursor:pointer;
+  transition:transform 0.08s ease, background 0.08s ease;
 }
 
-.bar button:active{
-  transform:scale(0.96);
+.button-bar button:active{
+  transform:scale(0.97);
   background:#1a1a1d;
 }
 
-.bar .danger{
+.button-bar .danger{
   color:#ff453a;
 }
 
 /* =========================
-   EMPTY STATE (soft)
+   EMPTY STATE
 ========================= */
 
-.empty{
+.empty-state{
   grid-column:1/-1;
   text-align:center;
-  padding:40px 0;
-  color:rgba(255,255,255,0.35);
+  padding:56px 20px;
 }
 
-.empty span{
-  display:block;
-  font-size:13px;
-  margin-top:6px;
+.empty-state .icon{
+  font-size:48px;
+  opacity:0.4;
+  margin-bottom:12px;
+}
+
+.empty-state .title{
+  font-size:14px;
+  color:rgba(255,255,255,0.5);
+  text-transform:none;
+  letter-spacing:0;
+  margin-bottom:6px;
+}
+
+.empty-state .hint{
+  font-size:12px;
+  color:rgba(255,255,255,0.3);
+}
+
+/* =========================
+   NOTE COUNT BADGE
+========================= */
+
+.count-badge{
+  font-size:11px;
+  color:rgba(255,255,255,0.35);
+  margin-left:8px;
+  font-weight:400;
 }
 </style>
 </head>
@@ -213,117 +251,227 @@ textarea:focus{
 <body>
 
 <div class="shell">
-
   <div class="top">
-    <div class="title">notes</div>
-    <button class="add" onclick="createNote()">+ new</button>
+    <div class="title">
+      notes
+      <span id="countBadge" class="count-badge"></span>
+    </div>
+    <button class="add" id="addBtn">+ new</button>
   </div>
-
   <div id="grid" class="grid"></div>
-
 </div>
 
 <div id="editor" class="editor">
-  <textarea id="text" placeholder="write something..."></textarea>
-
-  <div class="bar">
-    <button onclick="saveNote()">save</button>
-    <button onclick="closeEditor()">close</button>
-    <button class="danger" onclick="deleteNote()">delete</button>
+  <textarea id="noteText" placeholder="write something..." autofocus></textarea>
+  <div class="button-bar">
+    <button id="saveBtn">save</button>
+    <button id="closeBtn">close</button>
+    <button id="deleteBtn" class="danger">delete</button>
   </div>
 </div>
 
 <script>
-let notes = [];
-let activeId = null;
+(function(){
+  // =========================
+  // STATE
+  // =========================
+  let notes = [];
+  let activeId = null;
 
-const grid = document.getElementById("grid");
-const editor = document.getElementById("editor");
-const text = document.getElementById("text");
+  // DOM elements
+  const grid = document.getElementById("grid");
+  const editor = document.getElementById("editor");
+  const noteText = document.getElementById("noteText");
+  const addBtn = document.getElementById("addBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  const closeBtn = document.getElementById("closeBtn");
+  const deleteBtn = document.getElementById("deleteBtn");
+  const countBadge = document.getElementById("countBadge");
 
-function load(){
-  const data = localStorage.getItem("notes_ios_clean");
-  if(data) notes = JSON.parse(data);
-  render();
-}
-
-function save(){
-  localStorage.setItem("notes_ios_clean", JSON.stringify(notes));
-}
-
-function render(){
-  grid.innerHTML = "";
-
-  if(notes.length === 0){
-    grid.innerHTML = `
-      <div class="empty">
-        empty
-        <span>tap + to create a note</span>
-      </div>
-    `;
-    return;
+  // =========================
+  // STORAGE
+  // =========================
+  function loadNotes(){
+    const data = localStorage.getItem("notes_ios_v3");
+    if(data){
+      try{
+        notes = JSON.parse(data);
+      }catch(e){ notes = []; }
+    }
+    if(!notes || !Array.isArray(notes)) notes = [];
+    renderGrid();
   }
 
-  notes.forEach(n=>{
-    const div = document.createElement("div");
-    div.className = "note";
-    if(!n.text.trim()) div.classList.add("empty");
-
-    div.innerText = n.text.trim().slice(0,90) || "empty";
-    div.onclick = ()=>open(n.id);
-    grid.appendChild(div);
-  });
-}
-
-function createNote(){
-  const id = Date.now();
-  notes.unshift({id, text:""});
-  save();
-  render();
-  open(id);
-}
-
-function open(id){
-  activeId = id;
-  const n = notes.find(x=>x.id===id);
-  text.value = n?.text || "";
-  editor.style.display = "block";
-  text.focus();
-}
-
-function saveNote(){
-  const n = notes.find(x=>x.id===activeId);
-  if(n){
-    n.text = text.value;
-    save();
-    render();
+  function saveNotes(){
+    localStorage.setItem("notes_ios_v3", JSON.stringify(notes));
+    updateCountBadge();
   }
-}
 
-function closeEditor(){
-  saveNote();
-  editor.style.display = "none";
-  activeId = null;
-}
-
-function deleteNote(){
-  notes = notes.filter(x=>x.id!==activeId);
-  save();
-  editor.style.display = "none";
-  render();
-}
-
-text.addEventListener("input", ()=>{
-  const n = notes.find(x=>x.id===activeId);
-  if(n){
-    n.text = text.value;
-    save();
-    render();
+  function updateCountBadge(){
+    const count = notes.length;
+    if(countBadge){
+      countBadge.textContent = count === 0 ? '' : `· ${count}`;
+    }
   }
-});
 
-load();
+  // =========================
+  // RENDER GRID
+  // =========================
+  function renderGrid(){
+    if(!grid) return;
+
+    if(notes.length === 0){
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📝</div>
+          <div class="title">no notes yet</div>
+          <div class="hint">tap + to create one</div>
+        </div>
+      `;
+      updateCountBadge();
+      return;
+    }
+
+    grid.innerHTML = "";
+    notes.forEach(note => {
+      const card = document.createElement("div");
+      card.className = "note";
+      const displayText = (note.text || "").trim().slice(0, 90);
+      if(!displayText){
+        card.classList.add("empty");
+        card.innerText = "empty";
+      } else {
+        card.innerText = displayText;
+      }
+      card.onclick = () => openNote(note.id);
+      grid.appendChild(card);
+    });
+    updateCountBadge();
+  }
+
+  // =========================
+  // NOTE ACTIONS
+  // =========================
+  function createNote(){
+    const id = Date.now();
+    notes.unshift({ id: id, text: "" });
+    saveNotes();
+    renderGrid();
+    openNote(id);
+    // subtle haptic
+    if(navigator.vibrate) navigator.vibrate(5);
+  }
+
+  function openNote(id){
+    activeId = id;
+    const note = notes.find(n => n.id === id);
+    noteText.value = note ? note.text : "";
+    editor.classList.add("active");
+    // focus and move cursor to end
+    setTimeout(() => {
+      noteText.focus();
+      noteText.setSelectionRange(noteText.value.length, noteText.value.length);
+    }, 50);
+  }
+
+  function saveCurrentNote(){
+    if(activeId === null) return;
+    const note = notes.find(n => n.id === activeId);
+    if(note){
+      note.text = noteText.value;
+      saveNotes();
+      renderGrid();
+    }
+  }
+
+  function closeEditor(){
+    saveCurrentNote();
+    editor.classList.remove("active");
+    activeId = null;
+    noteText.value = "";
+  }
+
+  function deleteCurrentNote(){
+    if(activeId === null) return;
+    notes = notes.filter(n => n.id !== activeId);
+    saveNotes();
+    editor.classList.remove("active");
+    activeId = null;
+    noteText.value = "";
+    renderGrid();
+    if(navigator.vibrate) navigator.vibrate(10);
+  }
+
+  // =========================
+  // LIVE AUTO-SAVE
+  // =========================
+  function onTextInput(){
+    if(activeId !== null){
+      const note = notes.find(n => n.id === activeId);
+      if(note){
+        note.text = noteText.value;
+        saveNotes();
+        // live update preview (optional)
+        renderGrid();
+      }
+    }
+  }
+
+  // =========================
+  // KEYBOARD DISMISS (tap outside)
+  // =========================
+  function handleBackgroundTap(e){
+    if(editor.classList.contains("active")){
+      // if tapping outside textarea and buttons
+      const isTextarea = e.target === noteText;
+      const isButton = e.target.closest('.button-bar');
+      if(!isTextarea && !isButton){
+        noteText.blur();
+      }
+    }
+  }
+
+  // =========================
+  // HAPTICS ON BUTTONS (enhancement)
+  // =========================
+  function addHaptic(btn){
+    if(!btn) return;
+    btn.addEventListener('touchstart', () => {
+      if(navigator.vibrate) navigator.vibrate(3);
+    }, { passive: true });
+  }
+
+  // =========================
+  // INIT
+  // =========================
+  function init(){
+    loadNotes();
+
+    // Event listeners
+    addBtn.addEventListener('click', createNote);
+    saveBtn.addEventListener('click', () => {
+      saveCurrentNote();
+      closeEditor();
+    });
+    closeBtn.addEventListener('click', closeEditor);
+    deleteBtn.addEventListener('click', deleteCurrentNote);
+    noteText.addEventListener('input', onTextInput);
+
+    // Haptics
+    addHaptic(addBtn);
+    addHaptic(saveBtn);
+    addHaptic(closeBtn);
+    addHaptic(deleteBtn);
+
+    // Dismiss keyboard on background tap
+    document.body.addEventListener('touchstart', handleBackgroundTap, { passive: false });
+
+    // Ensure editor is hidden on start
+    editor.classList.remove("active");
+  }
+
+  init();
+})();
 </script>
-
 </body>
 </html>
